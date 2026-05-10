@@ -1631,12 +1631,9 @@
             let baseHealth = 50 + (currentWave - 1) * 12;
 
             // 基础速度从6开始，每波增加2.5，逐渐加快
-            let baseSpeed = (6 + (currentWave - 1) * 2.5) * (800 / canvas.width);
-            
-            // PC端速度比移动端快，因为PC端地图更大
-            if (!isMobile.any()) {
-                baseSpeed *= 1.3; // PC端速度提升30%
-            }
+            // PC端速度是移动端的3倍
+            const speedMultiplier = isMobile.any() ? 1 : 3;
+            let baseSpeed = (6 + (currentWave - 1) * 2.5) * (800 / canvas.width) * speedMultiplier;
 
             // 根据波次决定僵尸类型
             let zombieType;
