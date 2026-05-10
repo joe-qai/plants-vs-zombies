@@ -448,6 +448,179 @@
         .instructions p {
             margin: 2px 0;
         }
+        /* 设备适配样式 */
+
+        /* PC端样式 */
+        .desktop .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+            gap: 15px;
+        }
+
+        .desktop .plant-selection {
+            width: 200px;
+            padding: 15px;
+        }
+
+        .desktop .plant-card {
+            padding: 12px 8px;
+            min-width: 85px;
+            max-width: 90px;
+        }
+
+        .desktop .plant-emoji {
+            font-size: 2.5rem;
+        }
+
+        .desktop .plant-name {
+            font-size: 0.85rem;
+        }
+
+        .desktop .plant-cost {
+            font-size: 0.9rem;
+        }
+
+        .desktop .game-info {
+            width: 180px;
+            padding: 15px;
+        }
+
+        .desktop .info-label {
+            font-size: 0.9rem;
+        }
+
+        .desktop .info-value {
+            font-size: 1.1rem;
+        }
+
+        .desktop h1 {
+            font-size: 1.8rem;
+            padding: 10px 0;
+        }
+
+        .desktop .btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+
+        .desktop .instructions p {
+            font-size: 0.85rem;
+        }
+
+        .desktop #gameCanvas {
+            cursor: crosshair;
+        }
+
+        /* 移动端样式 */
+        .mobile .game-container {
+            padding: 4px;
+            gap: 4px;
+            height: calc(100vh - 50px);
+        }
+
+        .mobile .plant-selection {
+            width: 85px;
+            padding: 6px;
+        }
+
+        .mobile .plant-card {
+            padding: 6px 4px;
+            min-width: 65px;
+            max-width: 70px;
+        }
+
+        .mobile .plant-emoji {
+            font-size: 1.6rem;
+        }
+
+        .mobile .plant-name {
+            font-size: 0.65rem;
+        }
+
+        .mobile .plant-cost {
+            font-size: 0.7rem;
+        }
+
+        .mobile .game-info {
+            width: 100px;
+            padding: 8px;
+        }
+
+        .mobile .info-item {
+            margin-bottom: 6px;
+        }
+
+        .mobile .info-label {
+            font-size: 0.65rem;
+        }
+
+        .mobile .info-value {
+            font-size: 0.8rem;
+        }
+
+        .mobile h1 {
+            font-size: 1rem;
+            padding: 4px 0;
+        }
+
+        .mobile .btn {
+            padding: 8px 15px;
+            font-size: 0.8rem;
+        }
+
+        .mobile .instructions {
+            display: none;
+        }
+
+        .mobile #gameCanvas {
+            cursor: default;
+            touch-action: manipulation;
+        }
+
+        .mobile .countdown-toast .toast-content {
+            padding: 20px 30px;
+            min-width: 150px;
+        }
+
+        .mobile .toast-icon {
+            font-size: 2rem;
+        }
+
+        .mobile .toast-text {
+            font-size: 0.9rem;
+        }
+
+        .mobile .toast-countdown {
+            font-size: 2.8rem;
+        }
+
+        .mobile .game-over-content {
+            padding: 30px 20px;
+        }
+
+        .mobile .game-over-title {
+            font-size: 1.8rem;
+        }
+
+        .mobile .game-over-stats {
+            font-size: 0.9rem;
+        }
+
+        /* 响应式调整 */
+        @media screen and (max-width: 1024px) {
+            .desktop .game-container {
+                max-width: 100%;
+            }
+
+            .desktop .plant-selection {
+                width: 160px;
+            }
+
+            .desktop .game-info {
+                width: 150px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -545,6 +718,31 @@
     </div>
 
     <script>
+        // 设备检测
+        const isMobile = {
+            Android: function() {
+                return navigator.userAgent.match(/Android/i);
+            },
+            BlackBerry: function() {
+                return navigator.userAgent.match(/BlackBerry/i);
+            },
+            iOS: function() {
+                return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+            },
+            Opera: function() {
+                return navigator.userAgent.match(/Opera Mini/i);
+            },
+            Windows: function() {
+                return navigator.userAgent.match(/IEMobile/i);
+            },
+            any: function() {
+                return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+            }
+        };
+
+        // 添加设备类名到body
+        document.body.classList.add(isMobile.any() ? 'mobile' : 'desktop');
+
         // 游戏状态 - 移到最前面，确保在函数调用前初始化
         let gameRunning = false;
         let sun = 200;
