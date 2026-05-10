@@ -1785,6 +1785,11 @@
             }
         }
 
+        // 检测微信内置浏览器
+        function isWeChatBrowser() {
+            return /MicroMessenger/i.test(navigator.userAgent);
+        }
+
         // 点击画布
         // 处理点击和触摸事件的通用函数
         function handleCanvasInteraction(e) {
@@ -1792,15 +1797,50 @@
 
             let x, y;
             const canvasRect = canvas.getBoundingClientRect();
+            const isWeChat = isWeChatBrowser();
+            
+            // 获取视口尺寸和缩放比例
+            const visualViewport = window.visualViewport || null;
+            const scale = visualViewport ? visualViewport.scale : (window.devicePixelRatio || 1);
+            
+            // 计算canvas相对于视口的位置
+            const canvasLeft = canvasRect.left;
+            const canvasTop = canvasRect.top;
             
             if (e.type === 'click') {
-                x = e.clientX - canvasRect.left;
-                y = e.clientY - canvasRect.top;
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+                
+                // 微信浏览器需要特殊处理
+                if (isWeChat) {
+                    // 获取页面缩放比例
+                    const pageScale = visualViewport ? visualViewport.scale : 1;
+                    const pageX = e.clientX / pageScale;
+                    const pageY = e.clientY / pageScale;
+                    
+                    x = pageX - canvasLeft;
+                    y = pageY - canvasTop;
+                } else {
+                    x = clientX - canvasLeft;
+                    y = clientY - canvasTop;
+                }
             } else if (e.type === 'touchstart' || e.type === 'touchmove') {
                 e.preventDefault();
                 const touch = e.touches[0] || e.changedTouches[0];
-                x = touch.clientX - canvasRect.left;
-                y = touch.clientY - canvasRect.top;
+                let clientX = touch.clientX;
+                let clientY = touch.clientY;
+                
+                if (isWeChat) {
+                    const pageScale = visualViewport ? visualViewport.scale : 1;
+                    const pageX = clientX / pageScale;
+                    const pageY = clientY / pageScale;
+                    
+                    x = pageX - canvasLeft;
+                    y = pageY - canvasTop;
+                } else {
+                    x = clientX - canvasLeft;
+                    y = clientY - canvasTop;
+                }
             }
             
             const displayWidth = canvasRect.width;
