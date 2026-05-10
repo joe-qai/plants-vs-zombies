@@ -1,0 +1,12 @@
+{
+  "name": "expense-analysis",
+  "version": "1.0.0",
+  "description": "分析3月家庭支出明细",
+  "main": "analyze_expenses_detail.js",
+  "scripts": {
+    "start": "node analyze_expenses_detail.js"
+  },
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
