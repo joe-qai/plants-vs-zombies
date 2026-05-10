@@ -9,21 +9,23 @@
     <meta name="x5-fullscreen" content="true">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>植物大战僵尸</title>
     <style>
         html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: manipulation;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            touch-action: manipulation !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            border: none !important;
         }
 
         h1 {
@@ -169,6 +171,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
+            background: #1a3d15;
+        }
+
+        .game-canvas-container canvas {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
         }
 
         .countdown-toast {
@@ -710,15 +720,18 @@
             50% { transform: rotate(0deg); }
         }
 
-        .mobile.landscape .rotate-device-warning {
-            display: none !important;
-        }
-
-        .mobile.portrait .rotate-device-warning {
+        /* 默认显示横屏提示 */
+        .rotate-device-warning {
             display: flex !important;
         }
 
+        /* 桌面端隐藏 */
         .desktop .rotate-device-warning {
+            display: none !important;
+        }
+
+        /* 移动端横屏时隐藏 */
+        .mobile.landscape .rotate-device-warning {
             display: none !important;
         }
     </style>
@@ -847,8 +860,34 @@
             }
         };
 
+        // 检测是否为移动设备（增强版，包含iPhone检测）
+        function isMobileDevice() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            // 检测iOS设备（包括Safari）
+            if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+                return true;
+            }
+            // 检测Android设备
+            if (/Android/.test(ua)) {
+                return true;
+            }
+            // 检测其他移动设备特征
+            if (/Mobile|Tablet|Opera Mini|IEMobile/.test(ua)) {
+                return true;
+            }
+            // 检测微信内置浏览器
+            if (/MicroMessenger/.test(ua)) {
+                return true;
+            }
+            // 根据屏幕尺寸判断
+            if (window.innerWidth <= 768) {
+                return true;
+            }
+            return false;
+        }
+
         // 添加设备类名到body
-        document.body.classList.add(isMobile.any() ? 'mobile' : 'desktop');
+        document.body.classList.add(isMobileDevice() ? 'mobile' : 'desktop');
 
         // 检测屏幕方向并添加类名
         function updateOrientationClass() {
@@ -892,29 +931,9 @@
         const ctx = canvas.getContext('2d');
         const canvasContainer = document.querySelector('.game-canvas-container');
 
-        // 检测屏幕方向并强制横屏
+        // 屏幕方向检测（由CSS控制显示横屏提示）
         function checkOrientation() {
-            const isPortrait = window.innerWidth < window.innerHeight;
-            const gameContainer = document.querySelector('.game-container');
-            const body = document.body;
-
-            if (isPortrait) {
-                body.style.transform = 'rotate(90deg)';
-                body.style.transformOrigin = 'left top';
-                body.style.width = '100vh';
-                body.style.height = '100vw';
-                body.style.position = 'absolute';
-                body.style.top = '100%';
-                body.style.left = '0';
-            } else {
-                body.style.transform = '';
-                body.style.transformOrigin = '';
-                body.style.width = '';
-                body.style.height = '';
-                body.style.position = '';
-                body.style.top = '';
-                body.style.left = '';
-            }
+            updateOrientationClass();
         }
 
         // 初始检测
@@ -1772,29 +1791,30 @@
             if (!gameRunning || preparationTime > 0) return;
 
             let x, y;
+            const canvasRect = canvas.getBoundingClientRect();
             
             if (e.type === 'click') {
-                const rect = canvas.getBoundingClientRect();
-                const rectX = e.clientX - rect.left;
-                const rectY = e.clientY - rect.top;
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                x = rectX * scaleX;
-                y = rectY * scaleY;
+                x = e.clientX - canvasRect.left;
+                y = e.clientY - canvasRect.top;
             } else if (e.type === 'touchstart' || e.type === 'touchmove') {
                 e.preventDefault();
-                const rect = canvas.getBoundingClientRect();
-                const rectX = e.touches[0].clientX - rect.left;
-                const rectY = e.touches[0].clientY - rect.top;
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                x = rectX * scaleX;
-                y = rectY * scaleY;
+                const touch = e.touches[0] || e.changedTouches[0];
+                x = touch.clientX - canvasRect.left;
+                y = touch.clientY - canvasRect.top;
+            }
+            
+            const displayWidth = canvasRect.width;
+            const displayHeight = canvasRect.height;
+            const actualWidth = canvas.width;
+            const actualHeight = canvas.height;
+            
+            if (displayWidth > 0 && displayHeight > 0) {
+                x = x * (actualWidth / displayWidth);
+                y = y * (actualHeight / displayHeight);
             }
 
-            // 确保坐标在画布范围内
-            x = Math.max(0, Math.min(x, canvas.width - 1));
-            y = Math.max(0, Math.min(y, canvas.height - 1));
+            x = Math.max(0, Math.min(x, actualWidth - 1));
+            y = Math.max(0, Math.min(y, actualHeight - 1));
 
             // 检查是否点击了阳光
             let sunClicked = false;
